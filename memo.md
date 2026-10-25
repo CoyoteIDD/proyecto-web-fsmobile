@@ -62,3 +62,8 @@
     - Repositorio Git inicializado en rama `main`.
     - Archivo `.gitignore` para salvaguardar credenciales y secretos de OAuth (`client_secret_*.json`).
     - Repositorio público creado en GitHub (`CoyoteIDD/proyecto-web-fsmobile`) y publicado mediante GitHub Pages (`https://coyoteidd.github.io/proyecto-web-fsmobile/`).
+- **Fase 7 (Ajuste de Visualización de Tabla - Ocultación de ID y #):**
+  - **Eliminación de Columnas Técnicas en UI:** Se suprimió la columna de índice correlativo `#` y la columna técnica compuesta `ID` tanto en la cabecera como en las filas del visor de stock en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js).
+  - **Priorización de Columna `CODIGO`:** Implementación de la función `getVisibleColumns()` para asegurar que la tabla inicie directamente con `CODIGO` como primera columna visible.
+  - **Consistencia en Exportación:** Actualización de `exportToCsv()` para sincronizar las columnas descargadas con la vista depurada en pantalla.
+  - **Estilo Visual:** Realce tipográfico de la columna principal `CODIGO` en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html).

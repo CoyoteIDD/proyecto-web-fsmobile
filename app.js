@@ -411,6 +411,26 @@ async function fetchData() {
 }
 
 /**
+ * Obtiene las columnas visibles para la interfaz, omitiendo la columna técnica 'ID'
+ * y posicionando 'CODIGO' como la primera columna visible.
+ */
+function getVisibleColumns(records) {
+  if (!records || records.length === 0) return [];
+  const allColumns = Array.from(new Set(records.flatMap(r => Object.keys(r))));
+
+  // Omitir columna técnica ID
+  const columns = allColumns.filter(col => col.trim().toUpperCase() !== 'ID');
+
+  // Posicionar CODIGO como primera columna visible si existe
+  const codigoIndex = columns.findIndex(col => col.trim().toUpperCase() === 'CODIGO');
+  if (codigoIndex > 0) {
+    const [codigoCol] = columns.splice(codigoIndex, 1);
+    columns.unshift(codigoCol);
+  }
+  return columns;
+}
+
+/**
  * Renderiza la tabla dinámica según las columnas recibidas
  */
 function renderTable() {
@@ -428,13 +448,12 @@ function renderTable() {
   elements.emptyState.style.display = 'none';
   elements.dataTable.style.display = 'table';
 
-  // Obtener todas las columnas únicas presentes en los datos
-  const columns = Array.from(new Set(records.flatMap(r => Object.keys(r))));
+  // Obtener columnas visibles omitiendo 'ID' y garantizando 'CODIGO' al inicio
+  const columns = getVisibleColumns(records);
 
-  // Renderizar cabecera con indicadores de ordenamiento
+  // Renderizar cabecera con indicadores de ordenamiento (comienza directamente con CODIGO)
   elements.tableHead.innerHTML = `
     <tr>
-      <th style="width: 50px;">#</th>
       ${columns.map(col => `
         <th data-column="${escapeHtml(col)}" title="Clic para ordenar">
           ${escapeHtml(col)}
@@ -452,10 +471,9 @@ function renderTable() {
     });
   });
 
-  // Renderizar filas de datos
-  elements.tableBody.innerHTML = records.map((row, idx) => `
+  // Renderizar filas de datos (sin columna '#', primera columna es CODIGO)
+  elements.tableBody.innerHTML = records.map(row => `
     <tr>
-      <td style="color: var(--text-muted); font-size: 0.8rem;">${idx + 1}</td>
       ${columns.map(col => `
         <td title="${escapeHtml(String(row[col] ?? ''))}">${escapeHtml(String(row[col] ?? ''))}</td>
       `).join('')}
@@ -530,7 +548,7 @@ function exportToCsv() {
   const records = state.filteredRecords.length > 0 ? state.filteredRecords : state.rawRecords;
   if (!records || records.length === 0) return;
 
-  const columns = Array.from(new Set(records.flatMap(r => Object.keys(r))));
+  const columns = getVisibleColumns(records);
   
   const csvRows = [];
   csvRows.push(columns.map(formatCsvCell).join(','));
