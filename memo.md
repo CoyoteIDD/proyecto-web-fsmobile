@@ -6,14 +6,19 @@
 - **Spreadsheet ID:** `1XeUuWM83dJZr161vsxCtwmO5uG0Yad5ipZ0PbTozE54`
 - **Pestaña por Defecto:** `STOCK`
 - **API Web App Desplegada:** `https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec`
-- **Objetivo:** Desarrollar una página web conectada a las planillas electrónicas de AppSheet/Google Sheets para la visualización y extracción de datos.
-- **Arquitectura:** Opción A (Google Apps Script como Web App API JSON + Frontend HTML/JS con fetch).
+- **Google OAuth Client ID:** `69897615300-cvda0rts5fseiuf07n2r3kj2bvpv9k8v.apps.googleusercontent.com`
+- **Dominio Corporativo Autorizado:** `@index.com.py` (acceso restringido y obligatorio)
+- **Repositorio GitHub:** `https://github.com/CoyoteIDD/proyecto-web-fsmobile`
+- **Despliegue GitHub Pages:** `https://coyoteidd.github.io/proyecto-web-fsmobile/`
+- **Objetivo:** Desarrollar una página web conectada a las planillas electrónicas de AppSheet/Google Sheets para la visualización y extracción de datos con autenticación corporativa segura.
+- **Arquitectura:** Opción A (Google Apps Script como Web App API JSON + Frontend HTML/JS con Google Identity Services y fetch).
 
 ## 2. ESTRUCTURA DE ARCHIVOS
 - `memo.md`: Memoria de contexto y decisiones del proyecto.
 - `api.gs`: Código del Google Apps Script (Backend API).
-- `index.html`: Interfaz web principal.
-- `app.js`: Lógica de consumo de API y renderizado de datos.
+- `index.html`: Interfaz web principal con pantalla de login y visor de stock.
+- `app.js`: Lógica de autenticación GIS, control de acceso @index.com.py, consumo de API y renderizado.
+- `.gitignore`: Exclusión de credenciales privadas (`client_secret_*.json`) y archivos temporales.
 
 ## 3. REGISTRO DE AVANCES Y DECISIONES
 - **Fase 1 (Inicialización):** Estructura del proyecto creada y metodología de memoria registrada.
@@ -39,11 +44,21 @@
   - Conexión verificada: El frontend ahora realiza la consulta directa y automática a la base de datos de `STOCK` sin necesidad de configuración manual adicional por parte del usuario.
 - **Fase 5 (Refinamiento de Interfaz y Experiencia de Usuario):**
   - Cambio del título principal a "Stock e Inventario" en cabecera y etiqueta `<title>`.
-  - Eliminación de la tarjeta técnica de configuración de API y selector de pestaña, manteniendo las credenciales y parámetros de conexión integrados internamente en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js#L8-L9).
+  - Eliminación de la tarjeta técnica de configuración de API y selector de pestaña, manteniendo las credenciales y parámetros de conexión integrados internamente en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js).
   - Activación de carga automática al abrir la aplicación y adición del botón "🔄 Actualizar" en la barra de acciones.
   - Simplificación de métricas en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html): eliminación de "Hoja activa" y "Última sincronización", conservando exclusivamente el indicador de registros totales y filtrados.
-
-
-
-
-
+- **Fase 6 (Autenticación Corporativa Google Identity Services y Despliegue en GitHub Pages):**
+  - **Integración de Google Identity Services (GIS):** Se añadió el SDK oficial en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html) y la lógica de inicialización en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js).
+  - **Client ID OAuth:** Configurado `69897615300-cvda0rts5fseiuf07n2r3kj2bvpv9k8v.apps.googleusercontent.com` con orígenes autorizados para `http://localhost` y `https://coyoteidd.github.io`.
+  - **Regla Estricta de Dominio Corporativo `@index.com.py`:**
+    - Validación del correo extraído del token JWT: solo se permite el acceso si `email.toLowerCase().endsWith('@index.com.py')`.
+    - Si el usuario inicia sesión con cualquier otra cuenta (ej. `@gmail.com`), el sistema deniega el acceso inmediatamente, muestra una alerta explicativa y mantiene oculto el inventario.
+  - **Manejo de Sesión y Persistencia:**
+    - Almacenamiento seguro del usuario (`fsmobile_auth_user`) en `localStorage` para mantener la sesión activa entre recargas del navegador.
+    - Verificación automática de validez y caducidad al cargar la aplicación.
+    - Widget de perfil en cabecera con avatar, nombre, correo `@index.com.py` y botón de cierre de sesión ("Salir").
+    - Protección en `fetchData()` para impedir consultas a la API de Google Apps Script si no hay sesión activa.
+  - **Control de Versiones y Despliegue en GitHub Pages:**
+    - Repositorio Git inicializado en rama `main`.
+    - Archivo `.gitignore` para salvaguardar credenciales y secretos de OAuth (`client_secret_*.json`).
+    - Repositorio público creado en GitHub (`CoyoteIDD/proyecto-web-fsmobile`) y publicado mediante GitHub Pages (`https://coyoteidd.github.io/proyecto-web-fsmobile/`).
