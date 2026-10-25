@@ -67,6 +67,17 @@
     .header-title p {
       font-size: 0.88rem;
       color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .header-contact-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .header-contact-link:hover {
+      text-decoration: underline;
     }
 
     .header-right {
@@ -437,7 +448,7 @@
     <header>
       <div class="header-title">
         <h1>Stock e Inventario <span>📦</span></h1>
-        <p>Visor y extracción de datos en tiempo real (FSMobile)</p>
+        <p>Visor de Stock INDEX actualizado a las 1430hs<br>Problemas o consultas al correo: <a href="mailto:jdelacueva@index.com.py" class="header-contact-link">jdelacueva@index.com.py</a></p>
       </div>
       <div class="header-right">
         <!-- Widget de Usuario Autenticado -->
@@ -488,10 +499,10 @@
           <button id="btnFetch" class="btn-primary">
             <span>🔄 Actualizar</span>
           </button>
-          <button id="btnExportCsv" class="btn-success" disabled>
+          <button id="btnExportCsv" class="btn-success" style="display: none;" disabled>
             <span>📥 Exportar CSV</span>
           </button>
-          <button id="btnExportJson" class="btn-outline" disabled>
+          <button id="btnExportJson" class="btn-outline" style="display: none;" disabled>
             <span>💾 Descargar JSON</span>
           </button>
         </div>

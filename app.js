@@ -10,6 +10,12 @@ const GOOGLE_CLIENT_ID = '69897615300-cvda0rts5fseiuf07n2r3kj2bvpv9k8v.apps.goog
 const ALLOWED_DOMAIN = '@index.com.py';
 const STORAGE_KEY_AUTH = 'fsmobile_auth_user';
 
+// Lista de correos con permisos de Administrador para exportación y descarga de datos
+const ADMIN_EMAILS = [
+  'jdelacueva@index.com.py',
+  'iddserviciotecnico@index.com.py'
+];
+
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec';
 const DEFAULT_SHEET = 'STOCK';
 
@@ -265,6 +271,34 @@ function handleLogout() {
 }
 
 /**
+ * Verifica si el usuario actual tiene permisos de Administrador para exportación
+ */
+function isUserAdmin(user = state.currentUser) {
+  if (!user || !user.email) return false;
+  const emailNorm = user.email.trim().toLowerCase();
+  return ADMIN_EMAILS.some(admin => admin.toLowerCase() === emailNorm);
+}
+
+/**
+ * Controla la visibilidad y disponibilidad de los botones de descarga de datos.
+ * Ambos botones solo son visibles y funcionales para los administradores autorizados.
+ */
+function updateDownloadButtonsState() {
+  const isAdmin = isUserAdmin();
+  const hasData = state.rawRecords && state.rawRecords.length > 0;
+
+  if (elements.btnExportCsv) {
+    elements.btnExportCsv.style.display = isAdmin ? 'inline-flex' : 'none';
+    elements.btnExportCsv.disabled = !isAdmin || !hasData;
+  }
+
+  if (elements.btnExportJson) {
+    elements.btnExportJson.style.display = isAdmin ? 'inline-flex' : 'none';
+    elements.btnExportJson.disabled = !isAdmin || !hasData;
+  }
+}
+
+/**
  * Actualiza la interfaz de usuario para el estado AUTENTICADO
  */
 function updateUIForAuthenticatedUser() {
@@ -287,8 +321,11 @@ function updateUIForAuthenticatedUser() {
     }
   }
 
+  // Restricción de descargas: solo administradores autorizados
+  updateDownloadButtonsState();
+
   if (elements.statusBadge) {
-    elements.statusBadge.textContent = 'Autenticado';
+    elements.statusBadge.textContent = isUserAdmin() ? 'Admin' : 'Autenticado';
     elements.statusBadge.style.background = '#e8f0fe';
     elements.statusBadge.style.color = '#1a73e8';
   }
@@ -302,6 +339,7 @@ function updateUIForUnauthenticatedUser() {
   if (elements.loginCard) elements.loginCard.style.display = 'block';
   if (elements.userWidget) elements.userWidget.style.display = 'none';
   if (elements.statRows) elements.statRows.textContent = '0';
+  updateDownloadButtonsState();
 
   if (elements.statusBadge) {
     elements.statusBadge.textContent = 'Acceso Restringido';
@@ -382,8 +420,9 @@ async function fetchData() {
       elements.searchInput.disabled = false;
       elements.searchInput.value = '';
     }
-    if (elements.btnExportCsv) elements.btnExportCsv.disabled = state.rawRecords.length === 0;
-    if (elements.btnExportJson) elements.btnExportJson.disabled = state.rawRecords.length === 0;
+
+    // Actualizar disponibilidad y visibilidad de descargas según permisos de Administrador
+    updateDownloadButtonsState();
 
     renderTable();
 
@@ -543,8 +582,14 @@ function handleSearch(e) {
 
 /**
  * Exportación de datos a formato CSV (con soporte UTF-8 y compatibilidad Excel)
+ * Exclusivo para administradores autorizados.
  */
 function exportToCsv() {
+  if (!isUserAdmin()) {
+    showAlert('Permiso denegado: La descarga de archivos CSV está reservada para administradores autorizados.', 'error');
+    return;
+  }
+
   const records = state.filteredRecords.length > 0 ? state.filteredRecords : state.rawRecords;
   if (!records || records.length === 0) return;
 
@@ -572,8 +617,14 @@ function formatCsvCell(cell) {
 
 /**
  * Exportación de datos en formato JSON
+ * Exclusivo para administradores autorizados.
  */
 function exportToJson() {
+  if (!isUserAdmin()) {
+    showAlert('Permiso denegado: La descarga de archivos JSON está reservada para administradores autorizados.', 'error');
+    return;
+  }
+
   const records = state.filteredRecords.length > 0 ? state.filteredRecords : state.rawRecords;
   if (!records || records.length === 0) return;
 

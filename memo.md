@@ -67,3 +67,10 @@
   - **Priorización de Columna `CODIGO`:** Implementación de la función `getVisibleColumns()` para asegurar que la tabla inicie directamente con `CODIGO` como primera columna visible.
   - **Consistencia en Exportación:** Actualización de `exportToCsv()` para sincronizar las columnas descargadas con la vista depurada en pantalla.
   - **Estilo Visual:** Realce tipográfico de la columna principal `CODIGO` en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html).
+- **Fase 8 (Actualización de Encabezado y Restricción de Descargas a Administradores):**
+  - **Actualización de Leyenda de Encabezado:** Modificación del subtítulo en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html) para reflejar "Visor de Stock INDEX actualizado a las 1430hs" y canal de soporte a `jdelacueva@index.com.py`.
+  - **Limpieza de Tabla:** Tabla limpia comenzando directamente desde `CODIGO`, omitiendo por completo `#` e `ID`.
+  - **Control de Roles y Restricción de Descargas:**
+    - Configuración de administradores autorizados en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js): `jdelacueva@index.com.py` e `iddserviciotecnico@index.com.py`.
+    - Los botones "Exportar CSV" y "Descargar JSON" permanecen ocultos y bloqueados para usuarios estándar de `@index.com.py`. Solo los administradores pueden visualizarlos y ejecutarlos.
+    - Doble validación en frontend: visual mediante `updateDownloadButtonsState()` y lógica en `exportToCsv()` / `exportToJson()`.
