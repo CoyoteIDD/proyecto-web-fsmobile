@@ -1,0 +1,4 @@
+# Credenciales y archivos temporales
+client_secret_*.json
+Datos.txt
+.DS_Store

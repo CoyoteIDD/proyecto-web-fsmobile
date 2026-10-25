@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock e Inventario - FSMobile</title>
+  <!-- Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-hover: #1557b0;
+      --success: #0f9d58;
+      --success-hover: #0b8043;
+      --danger: #d93025;
+      --danger-hover: #b3261e;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-muted: #5f6368;
+      --border: #dadce0;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(60,64,67,0.15), 0 1px 2px rgba(60,64,67,0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      background: var(--card-bg);
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.45rem;
+      color: #1a73e8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #e8f0fe;
+      color: var(--primary);
+    }
+
+    /* User Profile Widget en Header */
+    .user-widget {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f1f3f4;
+      padding: 4px 12px 4px 6px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e8eaed;
+      border: 1px solid #dadce0;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text);
+    }
+
+    .user-email {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #dadce0;
+      color: #5f6368;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      border-radius: 14px;
+      cursor: pointer;
+      margin-left: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #fce8e6;
+      border-color: #fad2cf;
+      color: var(--danger);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    /* Login Screen Card */
+    .login-card {
+      max-width: 520px;
+      margin: 40px auto;
+      text-align: center;
+      padding: 40px 32px;
+      border: 1px solid var(--border);
+    }
+
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .login-header h2 {
+      font-size: 1.4rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.45;
+    }
+
+    .domain-restriction-badge {
+      display: inline-block;
+      background: #e8f0fe;
+      color: #1967d2;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.86rem;
+      margin-bottom: 24px;
+      border: 1px solid #c2e7ff;
+    }
+
+    .google-btn-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+      margin-bottom: 20px;
+    }
+
+    .login-footer {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: var(--success-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: #f1f3f4;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f3f4;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    /* Search & Action bar */
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      max-width: 450px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+    }
+
+    /* Notifications */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      display: none;
+      line-height: 1.45;
+    }
+
+    .alert.visible {
+      display: block;
+    }
+
+    .alert-error {
+      background: #fce8e6;
+      color: #c5221f;
+      border-left: 4px solid var(--danger);
+    }
+
+    .alert-info {
+      background: #e8f0fe;
+      color: #1a73e8;
+      border-left: 4px solid var(--primary);
+    }
+
+    /* Table Container */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #ffffff;
+      min-height: 200px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    thead {
+      background-color: #f1f3f4;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      padding: 12px 14px;
+      font-weight: 600;
+      color: #3c4043;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover {
+      background-color: #e8eaed;
+    }
+
+    th .sort-icon {
+      margin-left: 4px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f3f4;
+      color: #3c4043;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #fafbfc;
+    }
+
+    /* Empty state & Loading */
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.1);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border-left-color: var(--primary);
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-title">
+        <h1>Stock e Inventario <span>📦</span></h1>
+        <p>Visor y extracción de datos en tiempo real (FSMobile)</p>
+      </div>
+      <div class="header-right">
+        <!-- Widget de Usuario Autenticado -->
+        <div id="userWidget" class="user-widget" style="display: none;">
+          <img id="userAvatar" class="user-avatar" src="" alt="Avatar" />
+          <div class="user-details">
+            <span id="userName" class="user-name">Usuario</span>
+            <span id="userEmail" class="user-email">email@index.com.py</span>
+          </div>
+          <button id="btnLogout" class="btn-logout" type="button" title="Cerrar sesión corporativa">Salir</button>
+        </div>
+        <span class="badge" id="statusBadge">Listo</span>
+      </div>
+    </header>
+
+    <!-- Pantalla de Login / Autenticación Requerida -->
+    <div class="card login-card" id="loginCard">
+      <div class="login-header">
+        <div class="login-icon">🔐</div>
+        <h2>Acceso Corporativo</h2>
+        <p>Inicia sesión con tu cuenta de Google de la empresa para desbloquear el visor de inventario y stock.</p>
+      </div>
+
+      <!-- Alerta de Autenticación -->
+      <div id="authAlertBox" class="alert alert-error"></div>
+
+      <div class="domain-restriction-badge">
+        <span>Restricción: Cuentas autorizadas <strong>@index.com.py</strong></span>
+      </div>
+
+      <div class="google-btn-wrapper">
+        <div id="gSignInBtn"></div>
+      </div>
+
+      <div class="login-footer">
+        <p>🛡️ Autenticación gestionada mediante Google Identity Services. Si utilizas una cuenta ajena a Index S.A., el sistema rechazará el acceso automáticamente.</p>
+      </div>
+    </div>
+
+    <!-- Pantalla Principal: Visualización y Extracción de Datos de Stock -->
+    <div class="card" id="inventoryCard" style="display: none;">
+      <!-- Alertas de Carga / API -->
+      <div id="alertBox" class="alert alert-error"></div>
+
+      <div class="action-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Filtrar o buscar en stock..." disabled>
+        <div class="btn-group">
+          <button id="btnFetch" class="btn-primary">
+            <span>🔄 Actualizar</span>
+          </button>
+          <button id="btnExportCsv" class="btn-success" disabled>
+            <span>📥 Exportar CSV</span>
+          </button>
+          <button id="btnExportJson" class="btn-outline" disabled>
+            <span>💾 Descargar JSON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Estado de Registros -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span>Registros:</span>
+          <span class="stat-value" id="statRows">0</span>
+        </div>
+      </div>
+
+      <!-- Contenedor de Tabla Dinámica -->
+      <div class="table-container" id="tableContainer">
+        <div class="empty-state" id="emptyState">
+          <p>Cargando registros de stock e inventario...</p>
+        </div>
+        <table id="dataTable" style="display: none;">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
