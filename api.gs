@@ -97,6 +97,52 @@ function doGet(e) {
 }
 
 /**
+ * Función que atiende peticiones HTTP POST para registro de auditoría en la pestaña LOGS.
+ */
+function doPost(e) {
+  try {
+    const spreadsheetId = DEFAULT_SPREADSHEET_ID;
+    const ss = SpreadsheetApp.openById(spreadsheetId);
+    let logSheet = ss.getSheetByName("LOGS");
+
+    // Crear la pestaña LOGS si aún no existe
+    if (!logSheet) {
+      logSheet = ss.insertSheet("LOGS");
+      logSheet.appendRow(["FECHA_HORA", "EMAIL", "NOMBRE", "ACCION", "USER_AGENT"]);
+    }
+
+    let data = {};
+    if (e && e.postData && e.postData.contents) {
+      try {
+        data = JSON.parse(e.postData.contents);
+      } catch (err) {
+        data = e.parameter || {};
+      }
+    } else if (e && e.parameter) {
+      data = e.parameter;
+    }
+
+    const timestamp = data.timestamp || new Date().toISOString();
+    const email = data.email || "";
+    const name = data.name || "";
+    const action = data.action || "LOGIN";
+    const userAgent = data.userAgent || "";
+
+    logSheet.appendRow([timestamp, email, name, action, userAgent]);
+
+    return jsonResponse({
+      status: "success",
+      message: "Registro en LOGS exitoso."
+    });
+  } catch (error) {
+    return jsonResponse({
+      status: "error",
+      message: error.toString()
+    });
+  }
+}
+
+/**
  * Función auxiliar para empaquetar y devolver respuestas en formato JSON con soporte CORS.
  */
 function jsonResponse(payload) {

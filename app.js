@@ -192,8 +192,41 @@ function handleCredentialResponse(response) {
   saveSession(userData);
   state.currentUser = userData;
 
+  // Registrar visita en la pestaña LOGS de Google Apps Script de forma asíncrona
+  logVisitToAudit(userData);
+
   updateUIForAuthenticatedUser();
   fetchData();
+}
+
+/**
+ * Envía una petición POST asíncrona a Google Apps Script para registrar la visita en la pestaña 'LOGS'
+ */
+async function logVisitToAudit(user) {
+  if (!user || !user.email) return;
+
+  const payload = {
+    sheet: 'LOGS',
+    action: 'LOGIN',
+    email: user.email,
+    name: user.name || '',
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent || ''
+  };
+
+  try {
+    await fetch(DEFAULT_API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
+    });
+    console.log('Auditoría registrada en LOGS para:', user.email);
+  } catch (error) {
+    console.warn('No se pudo registrar la visita en LOGS:', error);
+  }
 }
 
 /**
