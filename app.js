@@ -16,7 +16,8 @@ const ADMIN_EMAILS = [
   'iddserviciotecnico@index.com.py'
 ];
 
-const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec';
+const DEFAULT_API_URL = API_URL;
 const DEFAULT_SHEET = 'STOCK';
 
 // Estado global de la aplicación
@@ -201,29 +202,23 @@ function handleCredentialResponse(response) {
 
 /**
  * Envía una petición POST (fetch) asíncrona a la URL de Google Apps Script pasando el payload JSON:
- * { correo: user.email, nombre: user.displayName }
+ * { correo: user.email, nombre: user.displayName || user.email }
+ * Utiliza method: 'POST' y mode: 'no-cors' para evitar bloqueos por políticas CORS del navegador.
  */
-async function logVisitToAudit(user) {
+function logVisitToAudit(user) {
   if (!user || !user.email) return;
 
-  const payload = {
-    correo: user.email,
-    nombre: user.displayName
-  };
-
-  try {
-    await fetch(DEFAULT_API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(payload)
-    });
-    console.log('Auditoría registrada en LOGS para:', user.email);
-  } catch (error) {
-    console.warn('No se pudo registrar la visita en LOGS:', error);
-  }
+  fetch(API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify({
+      correo: user.email,
+      nombre: user.displayName || user.email
+    })
+  }).catch(err => console.error("Error registrando log:", err));
 }
 
 /**
