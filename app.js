@@ -199,8 +199,8 @@ function handleCredentialResponse(response) {
   saveSession(user);
   state.currentUser = user;
 
-  // Registrar auditoría inmediatamente al detectar usuario de @index.com.py
-  registrarAuditoria(user.email, user.displayName);
+  // Registrar auditoría inmediatamente al detectar inicio de sesión
+  registrarAuditoria(user.email, user.displayName || user.name);
 
   updateUIForAuthenticatedUser();
   fetchData();
@@ -208,13 +208,14 @@ function handleCredentialResponse(response) {
 
 /**
  * Envía la auditoría inmediatamente al detectar usuario autenticado de @index.com.py
+ * estructurada como URLSearchParams compatibles con e.parameter de Google Apps Script.
  */
 function registrarAuditoria(email, name) {
   const API_URL = "https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec";
   
-  const formData = new URLSearchParams();
-  formData.append('correo', email);
-  formData.append('nombre', name || email);
+  const params = new URLSearchParams();
+  params.append('correo', email);
+  params.append('nombre', name || email);
 
   fetch(API_URL, {
     method: 'POST',
@@ -222,9 +223,9 @@ function registrarAuditoria(email, name) {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
-    body: formData.toString()
+    body: params.toString()
   })
-  .then(() => console.log("Auditoría enviada con éxito"))
+  .then(() => console.log("Auditoría enviada correctamente"))
   .catch(err => console.error("Error enviando auditoría:", err));
 }
 
@@ -264,8 +265,8 @@ function checkExistingSession() {
 
     state.currentUser = user;
 
-    // Registrar auditoría inmediatamente al detectar y restaurar sesión corporativa
-    registrarAuditoria(user.email, user.displayName);
+    // Registrar auditoría inmediatamente al validar la sesión activa
+    registrarAuditoria(user.email, user.displayName || user.name);
 
     return true;
   } catch (err) {
