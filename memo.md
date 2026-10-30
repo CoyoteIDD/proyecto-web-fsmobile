@@ -82,3 +82,6 @@
 - **Fase 10 (Remoción de Contador de Registros y Simplificación de Encabezado):**
   - **Eliminación del Contador de Registros:** Se removió por completo el elemento HTML `#statRows` / `.stats-bar` en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html) y la lógica asociada en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js) para optimizar el rendimiento y despejar la parte superior de la tabla.
   - **Simplificación del Encabezado:** Se actualizó el subtítulo a "Visor de Stock INDEX", conservando la referencia de contacto a `jdelacueva@index.com.py`.
+- **Fase 11 (Garantizar Ejecución de Auditoría Post-Autenticación y Control de SDK GIS):**
+  - **Auditoría Inmediata (`registrarAuditoria`):** Envío directo de auditoría vía URLSearchParams y POST `application/x-www-form-urlencoded` con `mode: 'no-cors'` tanto en login manual como al restaurar sesión corporativa persistida.
+  - **Prevención de Inicialización Duplicada de GIS:** Bandera `isGsiInitialized` para evitar llamadas redundantes a `google.accounts.id.initialize()` y suprimir advertencias del SDK en consola.

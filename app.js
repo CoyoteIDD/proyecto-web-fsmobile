@@ -100,6 +100,9 @@ function decodeJwt(token) {
   }
 }
 
+// Bandera para evitar inicializaciones duplicadas de Google Identity Services
+let isGsiInitialized = false;
+
 /**
  * Inicializa el cliente de Google Identity Services y renderiza el botón oficial de inicio de sesión
  */
@@ -107,12 +110,15 @@ function initGoogleIdentityServices() {
   const setupGsi = () => {
     if (window.google?.accounts?.id) {
       try {
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true
-        });
+        if (!isGsiInitialized) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
+          isGsiInitialized = true;
+        }
 
         if (elements.gSignInBtn) {
           elements.gSignInBtn.innerHTML = '';
@@ -193,33 +199,37 @@ function handleCredentialResponse(response) {
   saveSession(user);
   state.currentUser = user;
 
-  // Registrar visita en la pestaña LOGS de Google Apps Script de forma asíncrona
-  logVisitToAudit(user);
+  // Registrar auditoría inmediatamente al detectar usuario de @index.com.py
+  registrarAuditoria(user.email, user.displayName);
 
   updateUIForAuthenticatedUser();
   fetchData();
 }
 
 /**
- * Envía una petición POST (fetch) asíncrona a la URL de Google Apps Script pasando el payload JSON:
- * { correo: user.email, nombre: user.displayName || user.email }
- * Utiliza method: 'POST' y mode: 'no-cors' para evitar bloqueos por políticas CORS del navegador.
+ * Envía la auditoría inmediatamente al detectar usuario autenticado de @index.com.py
  */
-function logVisitToAudit(user) {
-  if (!user || !user.email) return;
+function registrarAuditoria(email, name) {
+  const API_URL = "https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec";
+  
+  const formData = new URLSearchParams();
+  formData.append('correo', email);
+  formData.append('nombre', name || email);
 
   fetch(API_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: {
-      'Content-Type': 'text/plain;charset=utf-8'
+      'Content-Type': 'application/x-www-form-urlencoded'
     },
-    body: JSON.stringify({
-      correo: user.email,
-      nombre: user.displayName || user.email
-    })
-  }).catch(err => console.error("Error registrando log:", err));
+    body: formData.toString()
+  })
+  .then(() => console.log("Auditoría enviada con éxito"))
+  .catch(err => console.error("Error enviando auditoría:", err));
 }
+
+// Alias de compatibilidad
+const logVisitToAudit = (user) => registrarAuditoria(user?.email, user?.displayName || user?.name);
 
 /**
  * Verifica la validez y expiración de una sesión guardada en localStorage
@@ -248,7 +258,15 @@ function checkExistingSession() {
       return false;
     }
 
+    if (!user.displayName && user.name) {
+      user.displayName = user.name;
+    }
+
     state.currentUser = user;
+
+    // Registrar auditoría inmediatamente al detectar y restaurar sesión corporativa
+    registrarAuditoria(user.email, user.displayName);
+
     return true;
   } catch (err) {
     console.warn('Error al verificar sesión existente:', err);
