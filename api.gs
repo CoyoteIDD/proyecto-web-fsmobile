@@ -123,8 +123,8 @@ function doPost(e) {
     }
 
     const timestamp = data.timestamp || new Date().toISOString();
-    const email = data.email || "";
-    const name = data.name || "";
+    const email = data.correo || data.email || "";
+    const name = data.nombre || data.displayName || data.name || "";
     const action = data.action || "LOGIN";
     const userAgent = data.userAgent || "";
 

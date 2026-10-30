@@ -181,37 +181,35 @@ function handleCredentialResponse(response) {
   }
 
   // Estructura de la sesión autenticada
-  const userData = {
+  const user = {
     email: payload.email,
+    displayName: payload.name || payload.email.split('@')[0],
     name: payload.name || payload.email.split('@')[0],
     picture: payload.picture || '',
     token: response.credential,
     exp: payload.exp // Tiempo de expiración en segundos Unix
   };
 
-  saveSession(userData);
-  state.currentUser = userData;
+  saveSession(user);
+  state.currentUser = user;
 
   // Registrar visita en la pestaña LOGS de Google Apps Script de forma asíncrona
-  logVisitToAudit(userData);
+  logVisitToAudit(user);
 
   updateUIForAuthenticatedUser();
   fetchData();
 }
 
 /**
- * Envía una petición POST asíncrona a Google Apps Script para registrar la visita en la pestaña 'LOGS'
+ * Envía una petición POST (fetch) asíncrona a la URL de Google Apps Script pasando el payload JSON:
+ * { correo: user.email, nombre: user.displayName }
  */
 async function logVisitToAudit(user) {
   if (!user || !user.email) return;
 
   const payload = {
-    sheet: 'LOGS',
-    action: 'LOGIN',
-    email: user.email,
-    name: user.name || '',
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent || ''
+    correo: user.email,
+    nombre: user.displayName
   };
 
   try {
@@ -483,21 +481,30 @@ async function fetchData() {
 }
 
 /**
- * Obtiene las columnas visibles para la interfaz, omitiendo la columna técnica 'ID'
- * y posicionando 'CODIGO' como la primera columna visible.
+ * Obtiene las columnas visibles para la interfaz, omitiendo la columna técnica 'ID' y la columna '#'
+ * y garantizando 'CODIGO' como la primera columna visible de la tabla.
  */
 function getVisibleColumns(records) {
   if (!records || records.length === 0) return [];
   const allColumns = Array.from(new Set(records.flatMap(r => Object.keys(r))));
 
-  // Omitir columna técnica ID
-  const columns = allColumns.filter(col => col.trim().toUpperCase() !== 'ID');
+  // Omitir columna técnica 'ID' y columna '#'
+  const columns = allColumns.filter(col => {
+    const colNorm = col.trim().toUpperCase();
+    return colNorm !== 'ID' && colNorm !== '#' && colNorm !== 'Nº' && colNorm !== 'N°';
+  });
 
-  // Posicionar CODIGO como primera columna visible si existe
+  // Posicionar CODIGO como primera columna visible
   const codigoIndex = columns.findIndex(col => col.trim().toUpperCase() === 'CODIGO');
   if (codigoIndex > 0) {
     const [codigoCol] = columns.splice(codigoIndex, 1);
     columns.unshift(codigoCol);
+  } else if (codigoIndex === -1) {
+    const partialIndex = columns.findIndex(col => col.trim().toUpperCase().includes('CODIGO') || col.trim().toUpperCase() === 'COD');
+    if (partialIndex > 0) {
+      const [codigoCol] = columns.splice(partialIndex, 1);
+      columns.unshift(codigoCol);
+    }
   }
   return columns;
 }
