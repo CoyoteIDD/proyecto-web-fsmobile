@@ -274,29 +274,6 @@
       cursor: not-allowed;
     }
 
-    /* Stats bar */
-    .stats-bar {
-      display: flex;
-      align-items: center;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #f1f3f4;
-      padding: 6px 14px;
-      border-radius: 20px;
-    }
-
-    .stat-value {
-      font-weight: bold;
-      color: var(--primary);
-    }
-
     /* Search & Action bar */
     .action-bar {
       display: flex;
@@ -448,7 +425,7 @@
     <header>
       <div class="header-title">
         <h1>Stock e Inventario <span>📦</span></h1>
-        <p>Visor de Stock INDEX actualizado a las 1430hs<br>Problemas o consultas al correo: <a href="mailto:jdelacueva@index.com.py" class="header-contact-link">jdelacueva@index.com.py</a></p>
+        <p>Visor de Stock INDEX<br>Problemas o consultas al correo: <a href="mailto:jdelacueva@index.com.py" class="header-contact-link">jdelacueva@index.com.py</a></p>
       </div>
       <div class="header-right">
         <!-- Widget de Usuario Autenticado -->
@@ -505,14 +482,6 @@
           <button id="btnExportJson" class="btn-outline" style="display: none;" disabled>
             <span>💾 Descargar JSON</span>
           </button>
-        </div>
-      </div>
-
-      <!-- Barra de Estado de Registros -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span>Registros:</span>
-          <span class="stat-value" id="statRows">0</span>
         </div>
       </div>
 

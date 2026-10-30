@@ -45,7 +45,6 @@ const elements = {
   // Inventario y Datos
   btnFetch: document.getElementById('btnFetch'),
   statusBadge: document.getElementById('statusBadge'),
-  statRows: document.getElementById('statRows'),
   alertBox: document.getElementById('alertBox'),
   searchInput: document.getElementById('searchInput'),
   btnExportCsv: document.getElementById('btnExportCsv'),
@@ -369,7 +368,6 @@ function updateUIForUnauthenticatedUser() {
   if (elements.inventoryCard) elements.inventoryCard.style.display = 'none';
   if (elements.loginCard) elements.loginCard.style.display = 'block';
   if (elements.userWidget) elements.userWidget.style.display = 'none';
-  if (elements.statRows) elements.statRows.textContent = '0';
   updateDownloadButtonsState();
 
   if (elements.statusBadge) {
@@ -440,11 +438,6 @@ async function fetchData() {
     state.filteredRecords = [...state.rawRecords];
     state.activeSheet = result.sheet || DEFAULT_SHEET;
     state.sortColumn = null;
-
-    // Actualizar cuenta de registros
-    if (elements.statRows) {
-      elements.statRows.textContent = state.rawRecords.length;
-    }
 
     // Habilitar controles interactivos
     if (elements.searchInput) {
@@ -603,18 +596,12 @@ function handleSearch(e) {
 
   if (!query) {
     state.filteredRecords = [...state.rawRecords];
-    if (elements.statRows) {
-      elements.statRows.textContent = `${state.rawRecords.length}`;
-    }
   } else {
     state.filteredRecords = state.rawRecords.filter(row => {
       return Object.values(row).some(val => 
         String(val).toLowerCase().includes(query)
       );
     });
-    if (elements.statRows) {
-      elements.statRows.textContent = `${state.filteredRecords.length} de ${state.rawRecords.length}`;
-    }
   }
 
   renderTable();

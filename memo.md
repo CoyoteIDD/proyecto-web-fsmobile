@@ -79,3 +79,6 @@
   - **Información Auditada:** Correo electrónico (`correo`) y nombre (`nombre`) dirigidos a la pestaña `LOGS`.
   - **Soporte de Backend en Google Apps Script:** Se integró la función `doPost(e)` en [`api.gs`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/api.gs) para recepcionar los datos con soporte para `correo`/`email` y `nombre`/`displayName`, creando automáticamente la pestaña `LOGS` con sus encabezados si no existe.
   - **Consolidación de Controles:** Verificación integral del encabezado actualizado, tabla iniciando en `CODIGO` sin `#` ni `ID`, y descarga de CSV/JSON restringida exclusivamente a los administradores `jdelacueva@index.com.py` e `iddserviciotecnico@index.com.py`.
+- **Fase 10 (Remoción de Contador de Registros y Simplificación de Encabezado):**
+  - **Eliminación del Contador de Registros:** Se removió por completo el elemento HTML `#statRows` / `.stats-bar` en [`index.html`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/index.html) y la lógica asociada en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js) para optimizar el rendimiento y despejar la parte superior de la tabla.
+  - **Simplificación del Encabezado:** Se actualizó el subtítulo a "Visor de Stock INDEX", conservando la referencia de contacto a `jdelacueva@index.com.py`.
