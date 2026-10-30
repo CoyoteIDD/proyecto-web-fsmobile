@@ -199,23 +199,37 @@ function handleCredentialResponse(response) {
   saveSession(user);
   state.currentUser = user;
 
-  // Registrar auditoría inmediatamente al detectar inicio de sesión
-  registrarAuditoria(user.email, user.displayName || user.name);
+  // Registrar auditoría inmediatamente al confirmar acceso del usuario
+  registrarAuditoria();
 
   updateUIForAuthenticatedUser();
   fetchData();
 }
 
 /**
- * Envía la auditoría inmediatamente al detectar usuario autenticado de @index.com.py
- * estructurada como URLSearchParams compatibles con e.parameter de Google Apps Script.
+ * Envía la auditoría inmediatamente al confirmar acceso o validar sesión activa,
+ * leyendo los datos directamente de la clave 'fsmobile_auth_user' de localStorage.
  */
-function registrarAuditoria(email, name) {
+function registrarAuditoria() {
   const API_URL = "https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec";
   
+  let email = "Desconocido";
+  let name = "Sin Nombre";
+
+  try {
+    const rawAuth = localStorage.getItem("fsmobile_auth_user");
+    if (rawAuth) {
+      const authData = JSON.parse(rawAuth);
+      email = authData.email || email;
+      name = authData.displayName || authData.name || name;
+    }
+  } catch (e) {
+    console.error("Error leyendo fsmobile_auth_user:", e);
+  }
+
   const params = new URLSearchParams();
   params.append('correo', email);
-  params.append('nombre', name || email);
+  params.append('nombre', name);
 
   fetch(API_URL, {
     method: 'POST',
@@ -225,12 +239,12 @@ function registrarAuditoria(email, name) {
     },
     body: params.toString()
   })
-  .then(() => console.log("Auditoría enviada correctamente"))
-  .catch(err => console.error("Error enviando auditoría:", err));
+  .then(() => console.log("Auditoría enviada para:", email))
+  .catch(err => console.error("Error en auditoría:", err));
 }
 
 // Alias de compatibilidad
-const logVisitToAudit = (user) => registrarAuditoria(user?.email, user?.displayName || user?.name);
+const logVisitToAudit = () => registrarAuditoria();
 
 /**
  * Verifica la validez y expiración de una sesión guardada en localStorage
@@ -265,8 +279,8 @@ function checkExistingSession() {
 
     state.currentUser = user;
 
-    // Registrar auditoría inmediatamente al validar la sesión activa
-    registrarAuditoria(user.email, user.displayName || user.name);
+    // Registrar auditoría inmediatamente al cargar la sesión activa desde localStorage
+    registrarAuditoria();
 
     return true;
   } catch (err) {
