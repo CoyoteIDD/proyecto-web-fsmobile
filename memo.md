@@ -3,8 +3,8 @@
 ## 1. INFORMACIÓN GENERAL
 - **Nombre del Caso:** Caso Pichón
 - **Ruta del Proyecto:** `/home/jorge/Documentos/Proyecto Web FSMobile`
-- **Spreadsheet ID:** `1XeUuWM83dJZr161vsxCtwmO5uG0Yad5ipZ0PbTozE54`
-- **Pestaña por Defecto:** `STOCK`
+- **Planilla de Stock (Lectura):** ID `1XeUuWM83dJZr161vsxCtwmO5uG0Yad5ipZ0PbTozE54` (Hoja `STOCK`)
+- **Planilla de Logs (Escritura):** ID `1C3gIDjOptcN9nUmMZiqW5CGrNj7empqF6QDoFwBkQ8k` (`Logs_Auditoria_Pichon`, Hoja `LOGS`)
 - **API Web App Desplegada:** `https://script.google.com/macros/s/AKfycbw4Q1dLzWyga-Ey7RuRJ4XhtxsdJy7KVZ8L1Bqt39aG1iCYBWIuRvqJHiesdBodC2O6/exec`
 - **Google OAuth Client ID:** `69897615300-cvda0rts5fseiuf07n2r3kj2bvpv9k8v.apps.googleusercontent.com`
 - **Dominio Corporativo Autorizado:** `@index.com.py` (acceso restringido y obligatorio)
@@ -85,3 +85,12 @@
 - **Fase 11 (Garantizar Ejecución de Auditoría Post-Autenticación y Control de SDK GIS):**
   - **Auditoría Inmediata (`registrarAuditoria`):** Extracción directa de credenciales desde `fsmobile_auth_user` en `localStorage` y envío vía URLSearchParams con POST `application/x-www-form-urlencoded` (`mode: 'no-cors'`) tanto en login manual como al restaurar sesión activa, compatible de forma nativa con `e.parameter` en Google Apps Script.
   - **Prevención de Inicialización Duplicada de GIS:** Bandera `isGsiInitialized` para evitar llamadas redundantes a `google.accounts.id.initialize()` y suprimir advertencias del SDK en consola.
+- **Fase 12 (Arquitectura de BD y Mecanismo de Auditoría de Accesos):**
+  - **Arquitectura de Base de Datos y Auditoría:**
+    - **Planilla de Stock (Lectura):** ID `1XeUuWM83dJZr161vsxCtwmO5uG0Yad5ipZ0PbTozE54` (Hoja `STOCK`).
+    - **Planilla de Logs (Escritura):** ID `1C3gIDjOptcN9nUmMZiqW5CGrNj7empqF6QDoFwBkQ8k` (`Logs_Auditoria_Pichon`, Hoja `LOGS`).
+    - **API Backend:** Google Apps Script desplegado como Web App, manejando lectura ([`doGet`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/api.gs#L21-L97)) y registro de accesos ([`doPost`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/api.gs#L102-L143)).
+  - **Mecanismo de Integración Frontend-Backend:**
+    - **Lectura de Sesión:** La sesión del usuario se lee desde `localStorage` usando la clave `fsmobile_auth_user` (extrayendo `email` y `displayName`).
+    - **Envío con URLSearchParams:** La función `registrarAuditoria()` en [`app.js`](file:///home/jorge/Documentos/Proyecto%20Web%20FSMobile/app.js) envía los datos mediante una petición HTTP POST con `URLSearchParams` (`mode: 'no-cors'`, `Content-Type: 'application/x-www-form-urlencoded'`) a la API de Apps Script.
+    - **Procesamiento en Apps Script:** El script en Apps Script recibe los campos `correo` y `nombre` mediante `e.parameter` y realiza el `appendRow` en la hoja `LOGS` de `Logs_Auditoria_Pichon` con fecha/hora formateada en la zona horaria `America/Asuncion`.

@@ -6,8 +6,12 @@
  */
 
 // Constantes por defecto de la base de datos (Caso Pichón)
-const DEFAULT_SPREADSHEET_ID = "1XeUuWM83dJZr161vsxCtwmO5uG0Yad5ipZ0PbTozE54";
+const DEFAULT_SPREADSHEET_ID = "1XeUuWM83dJZr161vsxCtwmO5uG0Yad5ipZ0PbTozE54"; // Planilla de Stock (Lectura)
 const DEFAULT_SHEET_NAME = "STOCK";
+
+// Planilla de Logs (Escritura - 'Logs_Auditoria_Pichon')
+const LOGS_SPREADSHEET_ID = "1C3gIDjOptcN9nUmMZiqW5CGrNj7empqF6QDoFwBkQ8k";
+const LOGS_SHEET_NAME = "LOGS";
 
 /**
  * Función principal que atiende peticiones HTTP GET.
@@ -101,34 +105,34 @@ function doGet(e) {
  */
 function doPost(e) {
   try {
-    const spreadsheetId = DEFAULT_SPREADSHEET_ID;
+    const spreadsheetId = LOGS_SPREADSHEET_ID;
     const ss = SpreadsheetApp.openById(spreadsheetId);
-    let logSheet = ss.getSheetByName("LOGS");
+    let logSheet = ss.getSheetByName(LOGS_SHEET_NAME);
 
     // Crear la pestaña LOGS si aún no existe
     if (!logSheet) {
-      logSheet = ss.insertSheet("LOGS");
-      logSheet.appendRow(["FECHA_HORA", "EMAIL", "NOMBRE", "ACCION", "USER_AGENT"]);
+      logSheet = ss.insertSheet(LOGS_SHEET_NAME);
+      logSheet.appendRow(["FECHA_HORA", "EMAIL", "NOMBRE"]);
     }
 
     let data = {};
-    if (e && e.postData && e.postData.contents) {
+    if (e && e.parameter) {
+      data = e.parameter;
+    } else if (e && e.postData && e.postData.contents) {
       try {
         data = JSON.parse(e.postData.contents);
       } catch (err) {
         data = e.parameter || {};
       }
-    } else if (e && e.parameter) {
-      data = e.parameter;
     }
 
-    const timestamp = data.timestamp || new Date().toISOString();
+    // Fecha/hora formateada en zona horaria America/Asuncion
+    const now = new Date();
+    const timestamp = Utilities.formatDate(now, "America/Asuncion", "yyyy-MM-dd HH:mm:ss");
     const email = data.correo || data.email || "";
     const name = data.nombre || data.displayName || data.name || "";
-    const action = data.action || "LOGIN";
-    const userAgent = data.userAgent || "";
 
-    logSheet.appendRow([timestamp, email, name, action, userAgent]);
+    logSheet.appendRow([timestamp, email, name]);
 
     return jsonResponse({
       status: "success",
